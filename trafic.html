@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>南台1丁目 列車運行状況</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            background: #000; 
+            color: #fff; 
+            margin: 0; 
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 3px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .board-title { font-size: 1.4rem; font-weight: bold; color: #aaa; }
+        .clock { font-size: 2.8rem; font-weight: bold; color: #fff; font-family: monospace; }
+        
+        .station-card { 
+            display: flex; 
+            flex-grow: 1;
+            flex-direction: column;
+            perspective: 1000px;
+        }
+        
+        .flop-anime {
+            animation: flipBoard 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            transform-origin: top center;
+        }
+        
+        @keyframes flipBoard {
+            0% { transform: rotateX(-90deg); opacity: 0; background: #050505; }
+            50% { background: #222; }
+            100% { transform: rotateX(0deg); opacity: 1; background: #111; }
+        }
+        
+        .station-name { 
+            font-size: 2.2rem; 
+            font-weight: bold; 
+            margin-bottom: 15px;
+            padding-left: 15px;
+            animation: flipHeader 0.4s ease-out forwards;
+            transform-origin: top center;
+        }
+        
+        @keyframes flipHeader {
+            0% { transform: rotateX(90deg); opacity: 0; }
+            100% { transform: rotateX(0deg); opacity: 1; }
+        }
+        
+        .header-marunouchi { color: #ff0055; border-left: 8px solid #ff0055; }
+        .header-oedo { color: #b6007a; border-left: 8px solid #b6007a; }
+        .header-keio { color: #00bfff; border-left: 8px solid #00bfff; }
+        
+        .direction-block { 
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .direction-name { 
+            font-size: 1.4rem; 
+            font-weight: bold; 
+            color: #fff;
+            margin-bottom: 12px; 
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+        
+        .bbs-row { 
+            display: flex; 
+            align-items: center; 
+            padding: 12px 20px; 
+            margin: 8px 0; 
+            font-family: 'Courier New', Courier, monospace, sans-serif; 
+            font-weight: bold;
+            font-size: 1.4rem;
+            border-radius: 4px;
+        }
+        
+        .bbs-mode { 
+            width: 140px; 
+            font-size: 1.1rem; 
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-align: center;
+            margin-right: 15px;
+        }
+        .bg-dash { background: #ff8c00; color: #000; }
+        .bg-walk { background: #32cd32; color: #000; }
+        
+        .bbs-time { width: 100px; text-align: center; font-size: 1.6rem; color: #fff; }
+        
+        .type-badge {
+            width: 90px;
+            text-align: center;
+            font-size: 1.2rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 15px;
+        }
+        .type-local { background: #444444; color: #fff; }
+        .type-semi  { background: #9acd32; color: #000; }
+        .type-rapid { background: #1e90ff; color: #fff; }
+        .type-exp   { background: #ff4500; color: #fff; }
+        
+        .bbs-dest { flex-grow: 1; text-align: left; padding-left: 25px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        .footer-status {
+            background: #161616;
+            border: 2px solid #333;
+            border-radius: 6px;
+            padding: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status-badge { padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 1rem; }
+        .bg-green { background: #28a745; color: #fff; }
+        .bg-red { background: #dc3545; color: #fff; }
+        .update-time { font-size: 0.9rem; color: #666; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="top-header">
+        <span class="board-title">列車運行状況</span>
+        <span class="clock" id="live-clock">00:00:00</span>
+    </div>
+    
+    <div id="station-container" style="flex-grow: 1; display: flex; flex-direction: column;">
+        <div style="text-align: center; padding-top: 50px; color: #888; font-size: 1.5rem;">
+            時刻表データ受信中...
+        </div>
+    </div>
+
+    <div class="footer-status" id="status-bar" style="display: none;">
+        <span id="current-station-type">運行情報</span>
+        <span class="status-badge bg-green" id="current-status-text">平常運転</span>
+    </div>
+
+    <div class="update-time" id="update-time"></div>
+
+    <script>
+        // 🔗 あなたのGASのURLがそのまま埋め込まれています！
+        const gasUrl = "https://script.google.com/macros/s/AKfycbztW_jypUH3RBj2iykU1mKI495bFCEZHVFaUJ0GGN1N197iBLeXYqCeSlnf2Wf-MO7zcg/exec";
+        let cachedData = null;
+        let currentStationIndex = 0;
+        const stationsList = ['nakano_shimbashi', 'nishi_shinjuku', 'hatagaya'];
+        
+        const stationNames = {
+            'nakano_shimbashi': '丸ノ内線 中野新橋駅',
+            'nishi_shinjuku': '大江戸線 西新宿五丁目駅',
+            'hatagaya': '京王新線 幡ヶ谷駅'
+        };
+
+        const headerColorClasses = {
+            'nakano_shimbashi': 'header-marunouchi',
+            'nishi_shinjuku': 'header-oedo',
+            'hatagaya': 'header-keio'
+        };
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        async function fetchTrainInfo() {
+            try {
+                const response = await fetch(gasUrl);
+                cachedData = await response.json();
+                document.getElementById('update-time').innerText = "データ最終受信: " + new Date().toLocaleTimeString();
+                if(document.getElementById('status-bar').style.display === 'none') {
+                    renderNextStation();
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                document.getElementById('update-time').innerText = "GASデータ通信エラー (インターネット接続を確認してください)";
+            }
+        }
+
+        function getTypeClass(typeStr) {
+            if (!typeStr) return "type-local";
+            if (typeStr.includes("区急") || typeStr.includes("区間急行")) return "type-semi";
+            if (typeStr.includes("快速")) return "type-rapid";
+            if (typeStr.includes("急行") || typeStr.includes("特急")) return "type-exp";
+            return "type-local";
+        }
+
+        function renderNextStation() {
+            if (!cachedData) return;
+            
+            try {
+                const container = document.getElementById('station-container');
+                const statusBar = document.getElementById('status-bar');
+                const statusText = document.getElementById('current-status-text');
+                const stationType = document.getElementById('current-station-type');
+                
+                const stationId = stationsList[currentStationIndex];
+                const stationData = cachedData[stationId];
+                if (!stationData) {
+                    currentStationIndex = (currentStationIndex + 1) % stationsList.length;
+                    return;
+                }
+                
+                const displayName = stationNames[stationId];
+                const headerColorClass = headerColorClasses[stationId] || '';
+                
+                statusBar.style.display = 'flex';
+                
+                const parts = displayName.split(/[  ]/); 
+                stationType.innerText = (parts.length > 0 ? parts[0] : "列車") + " 運行状況";
+                
+                statusText.innerText = stationData.status || "平常運転";
+                statusText.className = (statusText.innerText.includes("平常")) ? "status-badge bg-green" : "status-badge bg-red";
+                
+                let html = '<div class="station-card"><div class="station-name ' + headerColorClass + '">' + displayName + '</div>';
+                
+                const walkTrains = stationData.walk_trains || {};
+                const dashTrains = stationData.dash_trains || {};
+                const directions = Object.keys(walkTrains);
+                
+                let delayCounter = 0;
+                
+                directions.forEach(dir => {
+                    const w = walkTrains[dir] || {time:"--:--", type:"各停", dest:"不明"};
+                    const d = dashTrains[dir] || w;
+                    
+                    const dashStyle = (d.time === w.time) ? 'style="display: none;"' : '';
+                    const dTypeClass = getTypeClass(d.type);
+                    const wTypeClass = getTypeClass(w.type);
+                    
+                    html += '<div class="direction-block">';
+                    html += '<div class="direction-name">▼ ' + dir + '</div>';
+                    
+                    html += '<div class="bbs-row flop-anime" ' + dashStyle + ' style="animation-delay: ' + (delayCounter * 0.1) + 's;">';
+                    html += '<span class="bbs-mode bg-dash">急げば乗れる</span>';
+                    html += '<span class="bbs-time">' + d.time + '</span>';
+                    html += '<span class="type-badge ' + dTypeClass + '">' + d.type + '</span>';
+                    html += '<span class="bbs-dest">' + d.dest + '</span>';
+                    html += '</div>';
+                    delayCounter++;
+                    
+                    html += '<div class="bbs-row flop-anime" style="animation-delay: ' + (delayCounter * 0.1) + 's;">';
+                    html += '<span class="bbs-mode bg-walk">徒歩でも余裕</span>';
+                    html += '<span class="bbs-time">' + w.time + '</span>';
+                    html += '<span class="type-badge ' + wTypeClass + '">' + w.type + '</span>';
+                    html += '<span class="bbs-dest">' + w.dest + '</span>';
+                    html += '</div>';
+                    delayCounter++;
+                    
+                    html += '</div>';
+                });
+                
+                html += '</div>';
+                container.innerHTML = html;
+                
+            } catch (err) {
+                console.error("Render Error:", err);
+            } finally {
+                currentStationIndex = (currentStationIndex + 1) % stationsList.length;
+            }
+        }
+
+        // 初回実行とタイマー
+        fetchTrainInfo();
+        setInterval(fetchTrainInfo, 60000); // 1分ごとにGASから最新データを取得
+        setInterval(renderNextStation, 10000); // 10秒ごとに駅を切り替えてパタパタ
+    </script>
+</body>
+</html>
