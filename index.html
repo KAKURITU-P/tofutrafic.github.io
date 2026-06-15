@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>南台1丁目 列車運行状況 (16:9ジャストフィット版)</title>
+    <title>近隣駅列車運行状況</title>
     <style>
         * { box-sizing: border-box; }
         
@@ -127,7 +127,7 @@
         .bg-dash { background: #ff8c00; color: #000; }
         .bg-walk { background: #2cd32c; color: #000; }
         
-        /* 発車時刻（LED風オレンジ） */
+        /* 发车時刻（LED風オレンジ） */
         .bbs-time { 
             width: 12vw; 
             text-align: center; 
@@ -180,13 +180,25 @@
         .status-badge { padding: 0.2vh 1vw; border-radius: 4px; font-weight: bold; font-size: 1.8vh; }
         .bg-green { background: #218838; color: #fff; }
         .bg-red { background: #c82333; color: #fff; }
-        .update-time { font-size: 1.5vh; color: #444; text-align: center; }
+        
+        /* ★免責注釈が入るフッターエリア（16:9を維持するため横並び、かつ文字を小さめに調整） */
+        .footer-note-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 3vh;
+            padding: 0 1vw;
+            font-size: 1.4vh;
+            color: #555;
+        }
+        .update-time { font-weight: bold; }
+        .disclaimer { text-align: right; color: #444; }
     </style>
 </head>
 <body>
 
     <div class="top-header">
-        <span class="board-title">南台1丁目 運行板</span>
+        <span class="board-title">近隣駅列車運行状況</span>
         <span class="clock" id="live-clock">00:00:00</span>
     </div>
     
@@ -201,7 +213,10 @@
         <span class="status-badge bg-green" id="current-status-text">平常運転</span>
     </div>
 
-    <div class="update-time" id="update-time"></div>
+    <div class="footer-note-area">
+        <span class="update-time" id="update-time">Update: --:--:--</span>
+        <span class="disclaimer">※本データは目安であり、実際の列車への乗車を確約・保証するものではありません。</span>
+    </div>
 
     <script>
         const gasUrl = "https://script.google.com/macros/s/AKfycbwPB-yNfOTLHc8IslqUmBvGc6jjtEhq18KQairLUbfVB86nr5My3tHzIi8TZI5241pPsg/exec";
@@ -211,7 +226,7 @@
         
         const stationNames = {
             'nakano_shimbashi': '丸ノ内線 中野新橋駅',
-            'nishi_shinjuku': '大江戸線 西新宿五丁目',
+            'nishi_shinjuku': '大江戸線 西新宿五丁目駅',
             'hatagaya': '京王新線 幡ヶ谷駅'
         };
 
