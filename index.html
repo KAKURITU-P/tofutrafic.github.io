@@ -2,56 +2,56 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>南台1丁目 列車運行状況</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>南台1丁目 列車運行状況 (16:9ジャストフィット版)</title>
     <style>
         * { box-sizing: border-box; }
+        
+        /* 16:9の画面内に絶対にすべてを収める設定 */
         body { 
-            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif; 
             background: #000; 
             color: #fff; 
             margin: 0; 
-            padding: 20px;
+            padding: 1vh 1.5vw; 
             height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             overflow: hidden;
         }
+
+        /* ヘッダーの高さを少し抑えてメイン領域を広く */
         .top-header {
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
-            border-bottom: 3px solid #333;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            align-items: center;
+            border-bottom: 3px solid #222;
+            padding-bottom: 0.5vh;
+            height: 7vh;
         }
-        .board-title { font-size: 1.4rem; font-weight: bold; color: #aaa; }
-        .clock { font-size: 2.8rem; font-weight: bold; color: #fff; font-family: monospace; }
+        .board-title { font-size: 2.5vh; font-weight: bold; color: #888; }
+        .clock { font-size: 5vh; font-weight: bold; color: #fff; font-family: monospace; }
         
+        /* 上下線ブロックを包むメインコンテナ */
         .station-card { 
             display: flex; 
             flex-grow: 1;
             flex-direction: column;
+            justify-content: space-between;
+            height: 80vh; /* 全体の8割の高さに固定 */
             perspective: 1000px;
+            margin: 1vh 0;
         }
         
-        .flop-anime {
-            animation: flipBoard 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            transform-origin: top center;
-        }
-        
-        @keyframes flipBoard {
-            0% { transform: rotateX(-90deg); opacity: 0; background: #050505; }
-            50% { background: #222; }
-            100% { transform: rotateX(0deg); opacity: 1; background: #111; }
-        }
-        
+        /* 駅名表示 */
         .station-name { 
-            font-size: 2.2rem; 
+            font-size: 3.8vh; 
             font-weight: bold; 
-            margin-bottom: 15px;
-            padding-left: 15px;
+            height: 5vh;
+            display: flex;
+            align-items: center;
+            padding-left: 1vw;
             animation: flipHeader 0.4s ease-out forwards;
             transform-origin: top center;
         }
@@ -61,93 +61,138 @@
             100% { transform: rotateX(0deg); opacity: 1; }
         }
         
-        .header-marunouchi { color: #ff0055; border-left: 8px solid #ff0055; }
-        .header-oedo { color: #b6007a; border-left: 8px solid #b6007a; }
-        .header-keio { color: #00bfff; border-left: 8px solid #00bfff; }
+        .header-marunouchi { color: #ff0055; border-left: 10px solid #ff0055; }
+        .header-oedo { color: #ff00b3; border-left: 10px solid #ff00b3; }
+        .header-keio { color: #00bfff; border-left: 10px solid #00bfff; }
         
+        /* ★ 上り・下りの各ブロック：高さを35vhに固定して、はみ出しを絶対防止 */
         .direction-block { 
-            background: #111;
-            border: 1px solid #222;
+            background: #000;
+            border: 2px solid #1a1a1a;
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
+            padding: 1vh 1.5vw;
+            height: 35vh; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
+        /* 方向名（「▼ 六本木・大門方面」など） */
         .direction-name { 
-            font-size: 1.4rem; 
+            font-size: 2.5vh; 
             font-weight: bold; 
-            color: #fff;
-            margin-bottom: 12px; 
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
+            color: #ccc;
+            border-bottom: 2px solid #222;
+            padding-bottom: 0.3vh;
+            margin-bottom: 0.5vh;
+            height: 3.5vh;
         }
         
+        /* 🔄 パタパタアニメーション */
+        .flop-anime {
+            animation: flipBoard 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            transform-origin: top center;
+        }
+        @keyframes flipBoard {
+            0% { transform: rotateX(-90deg); opacity: 0; background: #050505; }
+            100% { transform: rotateX(0deg); opacity: 1; background: #0c0c0c; }
+        }
+        
+        /* 列車情報行：2つの方向が収まる限界のベストサイズ（約11vh） */
         .bbs-row { 
             display: flex; 
             align-items: center; 
-            padding: 12px 20px; 
-            margin: 8px 0; 
+            padding: 0 1.5vw; 
+            margin: 0.4vh 0; 
+            height: 11vh;
             font-family: 'Courier New', Courier, monospace, sans-serif; 
             font-weight: bold;
-            font-size: 1.4rem;
-            border-radius: 4px;
+            font-size: 4vh; 
+            border-radius: 6px;
+            background: #0c0c0c;
+            border: 1px solid #222;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
         }
         
+        /* バッジ類 */
         .bbs-mode { 
-            width: 140px; 
-            font-size: 1.1rem; 
-            padding: 4px 10px;
+            width: 18vw; 
+            font-size: 2.3vh; 
+            padding: 0.8vh 0;
             border-radius: 4px;
             text-align: center;
-            margin-right: 15px;
+            margin-right: 2vw;
+            flex-shrink: 0;
         }
         .bg-dash { background: #ff8c00; color: #000; }
-        .bg-walk { background: #32cd32; color: #000; }
+        .bg-walk { background: #2cd32c; color: #000; }
         
-        .bbs-time { width: 100px; text-align: center; font-size: 1.6rem; color: #fff; }
+        /* 発車時刻（LED風オレンジ） */
+        .bbs-time { 
+            width: 12vw; 
+            text-align: center; 
+            font-size: 4.5vh; 
+            color: #ffcc00; 
+            font-family: 'Courier New', monospace;
+            flex-shrink: 0;
+        }
         
+        /* 種別 */
         .type-badge {
-            width: 90px;
+            width: 10vw;
             text-align: center;
-            font-size: 1.2rem;
-            padding: 3px 8px;
+            font-size: 2.3vh;
+            padding: 0.5vh 0;
             border-radius: 4px;
             font-weight: bold;
-            margin-left: 15px;
+            margin-left: 2vw;
+            flex-shrink: 0;
         }
-        .type-local { background: #444444; color: #fff; }
+        .type-local { background: #333333; color: #fff; border: 1px solid #444; }
         .type-semi  { background: #9acd32; color: #000; }
         .type-rapid { background: #1e90ff; color: #fff; }
         .type-exp   { background: #ff4500; color: #fff; }
         
-        .bbs-dest { flex-grow: 1; text-align: left; padding-left: 25px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        /* 行き先 */
+        .bbs-dest { 
+            flex-grow: 1; 
+            text-align: left; 
+            padding-left: 3vw; 
+            color: #fff; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap;
+            font-size: 4.2vh;
+        }
         
+        /* 下部ステータスバー */
         .footer-status {
-            background: #161616;
-            border: 2px solid #333;
+            background: #0a0a0a;
+            border: 2px solid #222;
             border-radius: 6px;
-            padding: 15px;
-            font-size: 1.1rem;
+            padding: 0.5vh 1.5vw;
+            font-size: 2vh;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 5vh;
         }
-        .status-badge { padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 1rem; }
-        .bg-green { background: #28a745; color: #fff; }
-        .bg-red { background: #dc3545; color: #fff; }
-        .update-time { font-size: 0.9rem; color: #666; text-align: center; margin-top: 10px; }
+        .status-badge { padding: 0.2vh 1vw; border-radius: 4px; font-weight: bold; font-size: 1.8vh; }
+        .bg-green { background: #218838; color: #fff; }
+        .bg-red { background: #c82333; color: #fff; }
+        .update-time { font-size: 1.5vh; color: #444; text-align: center; }
     </style>
 </head>
 <body>
 
     <div class="top-header">
-        <span class="board-title">列車運行状況</span>
+        <span class="board-title">南台1丁目 運行板</span>
         <span class="clock" id="live-clock">00:00:00</span>
     </div>
     
-    <div id="station-container" style="flex-grow: 1; display: flex; flex-direction: column;">
-        <div style="text-align: center; padding-top: 50px; color: #888; font-size: 1.5rem;">
-            時刻表データ受信中...
+    <div id="station-container" style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+        <div style="text-align: center; color: #555; font-size: 3vh;">
+            時刻表データ更新中...
         </div>
     </div>
 
@@ -159,7 +204,6 @@
     <div class="update-time" id="update-time"></div>
 
     <script>
-        // 🔗 あなたのGASのURLがそのまま埋め込まれています！
         const gasUrl = "https://script.google.com/macros/s/AKfycbztW_jypUH3RBj2iykU1mKI495bFCEZHVFaUJ0GGN1N197iBLeXYqCeSlnf2Wf-MO7zcg/exec";
         let cachedData = null;
         let currentStationIndex = 0;
@@ -167,7 +211,7 @@
         
         const stationNames = {
             'nakano_shimbashi': '丸ノ内線 中野新橋駅',
-            'nishi_shinjuku': '大江戸線 西新宿五丁目駅',
+            'nishi_shinjuku': '大江戸線 西新宿五丁目',
             'hatagaya': '京王新線 幡ヶ谷駅'
         };
 
@@ -188,13 +232,13 @@
             try {
                 const response = await fetch(gasUrl);
                 cachedData = await response.json();
-                document.getElementById('update-time').innerText = "データ最終受信: " + new Date().toLocaleTimeString();
+                document.getElementById('update-time').innerText = "Update: " + new Date().toLocaleTimeString();
                 if(document.getElementById('status-bar').style.display === 'none') {
                     renderNextStation();
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);
-                document.getElementById('update-time').innerText = "GASデータ通信エラー (インターネット接続を確認してください)";
+                document.getElementById('update-time').innerText = "GASデータ通信エラー";
             }
         }
 
@@ -252,7 +296,8 @@
                     html += '<div class="direction-block">';
                     html += '<div class="direction-name">▼ ' + dir + '</div>';
                     
-                    html += '<div class="bbs-row flop-anime" ' + dashStyle + ' style="animation-delay: ' + (delayCounter * 0.1) + 's;">';
+                    // 急げば乗れる行
+                    html += '<div class="bbs-row flop-anime" ' + dashStyle + ' style="animation-delay: ' + (delayCounter * 0.06) + 's;">';
                     html += '<span class="bbs-mode bg-dash">急げば乗れる</span>';
                     html += '<span class="bbs-time">' + d.time + '</span>';
                     html += '<span class="type-badge ' + dTypeClass + '">' + d.type + '</span>';
@@ -260,7 +305,8 @@
                     html += '</div>';
                     delayCounter++;
                     
-                    html += '<div class="bbs-row flop-anime" style="animation-delay: ' + (delayCounter * 0.1) + 's;">';
+                    // 徒歩でも余裕行
+                    html += '<div class="bbs-row flop-anime" style="animation-delay: ' + (delayCounter * 0.06) + 's;">';
                     html += '<span class="bbs-mode bg-walk">徒歩でも余裕</span>';
                     html += '<span class="bbs-time">' + w.time + '</span>';
                     html += '<span class="type-badge ' + wTypeClass + '">' + w.type + '</span>';
@@ -281,10 +327,9 @@
             }
         }
 
-        // 初回実行とタイマー
         fetchTrainInfo();
-        setInterval(fetchTrainInfo, 60000); // 1分ごとにGASから最新データを取得
-        setInterval(renderNextStation, 10000); // 10秒ごとに駅を切り替えてパタパタ
+        setInterval(fetchTrainInfo, 60000);
+        setInterval(renderNextStation, 10000);
     </script>
 </body>
 </html>
